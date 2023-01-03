@@ -8,33 +8,48 @@ const folderId = process.env.NEWFOLDERID;
 let data;
 
 const requestBody = (result) => {
-    return new Promise((resolve) => {
-        let recipients = [];
-        let recip = result.recipients;
-        recip.map(({
-            email,
-            first_name,
-            last_name,
-            role
-        }) => {
-            recipients.push({
-                "email": email,
-                "first_name": first_name,
-                "last_name": last_name,
-                "role": role
+    if (result.version == 2) {
+        return new Promise((resolve) => {
+            let recipients = [];
+            let recip = result.recipients;
+            recip.map(({
+                email,
+                first_name,
+                last_name,
+                role
+            }) => {
+                recipients.push({
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "role": role
+                });
             });
-        });
-        data = {
-            "name": `${result.name}`,
-            "recipients": recipients,
-            "folder_uuid": folderId,
-            "metadata": {
-                "migratedDocID": result.id
-            },
-            "parse_form_fields": false
-        }
-        return resolve(data)
-    })
+            data = {
+                "name": `${result.name}`,
+                "recipients": recipients,
+                "folder_uuid": folderId,
+                "metadata": {
+                    "migratedDocID": result.id
+                },
+                "parse_form_fields": false
+            }
+            return resolve(data)
+        })
+    } else {
+        return new Promise((resolve) => {
+            data = {
+                "name": `${result.name}`,
+                "recipients": [],
+                "folder_uuid": folderId,
+                "metadata": {
+                    "migratedDocID": result.id
+                },
+                "parse_form_fields": false
+            }
+            return resolve(data)
+        })
+    }
 }
 
 const upload = (reqBody) => {
@@ -49,7 +64,7 @@ const upload = (reqBody) => {
                 },
                 formData: {
                     file: {
-                        'value': fs.createReadStream('/Users/patrickmarmion/Documents/VSCode/Migrations/Workspace/v1/panda.pdf'),
+                        'value': fs.createReadStream('/Users/patrickmarmion/Documents/VSCode/Migrations/Workspace/panda.pdf'),
                         'options': {
                             'filename': 'panda.pdf',
                             'contentType': null

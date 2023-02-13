@@ -6,22 +6,35 @@ require('dotenv').config({
 const api_key = process.env.HOME_API_KEY;
 
 
-const downloadDoc = async (result) => {
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    const config = {
-        url: `https://api.pandadoc.com/public/v1/documents/${result.id}/download-protected`,
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Authorization': `API-Key ${api_key}`
-        },
-        method: "GET",
-        responseType: "arraybuffer",
-        responseEncoding: "binary"
+const downloadDoc = async (result, retries = 0) => {
+    try {
+        let config = {
+            url: `https://api.pandadoc.com/public/v1/documents/${result.id}/download${result.status === 'document.completed' ? '-protected' : ''}`,
+            headers: {
+                'Content-Type': 'application/pdf',
+                'Authorization': `Bearer ${api_key}`
+            },
+            method: "GET",
+            responseType: "arraybuffer",
+            responseEncoding: "binary"
+        };
+    
+        let response = await axiosInstance(config);
+        fs.writeFileSync('panda.pdf', response.data, null);
+        console.log(`${result.status === 'document.completed' ? 'Completed Document' : 'Document'} downloaded`);
+    
+        return;
+    } catch (error) {
+        if (error.response) {
+            if (retries >= 5) {
+              throw new Error("Max retries exceeded, giving up.");
+            }
+            console.log(`Received 403 error, retrying in 3 seconds... (attempt ${retries + 1} of 5)`);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            return await downloadDoc(id, retries + 1);
+          }
+          throw error;
     }
-    let response = await axios(config);
-    fs.writeFileSync('panda.pdf', response.data, null);
-    console.log('Document downloaded');
-    return 
-}
+};
 
 module.exports = downloadDoc;

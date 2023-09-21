@@ -1,4 +1,3 @@
-//Import NPM modules
 import axiosInstance from "./Config/axiosInstance.mjs";
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -46,13 +45,13 @@ const indexScript = async () => {
         const createDocReqArray = await prepForMigration.mapDocDetailsToCreateDocRequest(docDetailsArray, newWorkspaceHeaders, axiosInstance, newWorkspaceFolderId);
         console.log('Number of Docs in this folder to migrate: ' + createDocReqArray.length);
 
-        await downloadDocIndex(createDocReqArray);
+        await downloadAndCreateDocIndex(createDocReqArray);
     } catch (error) {
         console.error(`Error processing doc: ${error.message}`);
     }
 };
 
-const downloadDocIndex = async (createDocReqArray) => {
+const downloadAndCreateDocIndex = async (createDocReqArray) => {
     const limit = pLimit(2); // Concurrency limit
 
     const downloadDocRequestsArray = await downloadDocProcess.createDownloadReqArray(createDocReqArray, originalWorkspaceAccessToken);
@@ -79,4 +78,4 @@ const downloadDocIndex = async (createDocReqArray) => {
 indexScript();
 
 //----NOTES---
-//Statuses: This works for draft, completed & declined docs only. However, warning to customers that copied draft docs are not as editable as they are created from a pdf, they also do not carry over fields. 
+//Statuses: This works for draft, completed, expired & declined docs only. However, warning to customers that copied draft docs are not as editable as they are created from a pdf, they also do not carry over fields. 

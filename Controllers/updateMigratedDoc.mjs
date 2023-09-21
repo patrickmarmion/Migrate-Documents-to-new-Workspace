@@ -42,6 +42,20 @@ const updateNewDocStatus = async (newDocId, reqBody, axiosInstance, newWorkspace
         }; 
         await axiosInstance.patch(`https://api.pandadoc.com/public/v1/documents/${newDocId}/status`, body, newWorkspaceHeaders);
     }
+    else if (reqBody.metadata.migratedDocStatus === "document.voided") {
+        const body = {
+            silent: true
+        }
+        await axiosInstance.post(`https://api.pandadoc.com/public/v1/documents/${newDocId}/send`, body, newWorkspaceHeaders);
+        const bodyExpire = {
+            "expiration": {
+                "expires_at": 86600,
+                "notification_enabled": "false",
+                "notification_interval": 86500
+            }
+        }
+        await axiosInstance.patch(`https://api.pandadoc.com/documents/${newDocId}/settings`, bodyExpire, newWorkspaceHeaders)
+    }
     console.log(`Document Status changed to ${reqBody.metadata.migratedDocStatus}`)
 };
 

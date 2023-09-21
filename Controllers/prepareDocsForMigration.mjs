@@ -3,7 +3,7 @@ const listDocumentsInMigrationFolder = async (headers, axiosInstance, homeFolder
     let page = 1;
     let docs = [];
     while (true) {
-        const response = await axiosInstance.get(`https://api.pandadoc.com/public/v1/documents?status=0&status=2&status=12&count=100&page=${page}&folder_uuid=${homeFolder}&order_by=-date_created`, headers);
+        const response = await axiosInstance.get(`https://api.pandadoc.com/public/v1/documents?status=0&status=2&status=11&status=12&count=100&page=${page}&folder_uuid=${homeFolder}&order_by=-date_created`, headers);
         if (response.data.results.length == 0) break;
         page++
         docs.push(...response.data.results)
